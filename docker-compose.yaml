@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: ./exam-frontend
+    ports:
+      - "3001:80"
+
+  backend:
+    build: ./exam-backend
+    ports:
+      - "5555:3000"
+    depends_on:
+      - mongodb-service-init
+    environment:
+      MONGO_URL: mongodb://mongodb-service-init:27017/exam
+
+  mongodb-service-init:
+    image: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.runCommand('ping')"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+
+volumes:
+  mongo-data:
+    driver: local
